@@ -12,3 +12,6 @@ migrate-up:
 
 migrate-down:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/rezonit_test_task?sslmode=disable" -verbose down
+
+sqlc:
+	sqlc generate
