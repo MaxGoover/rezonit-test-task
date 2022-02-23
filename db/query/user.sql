@@ -5,6 +5,11 @@ INSERT INTO users (first_name,
 VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: DeleteUser :exec
+DELETE
+FROM users
+WHERE id = $1;
+
 -- name: GetUser :one
 SELECT *
 FROM users
@@ -30,8 +35,3 @@ SET first_name = $2,
     age = $4
 WHERE id = $1
 RETURNING *;
-
--- name: DeleteUser :exec
-DELETE
-FROM users
-WHERE id = $1;
