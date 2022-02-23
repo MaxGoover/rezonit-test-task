@@ -1,4 +1,4 @@
-CREATE TABLE "users"
+CREATE TABLE users
 (
     "id"         serial PRIMARY KEY NOT NULL,
     "first_name" text               NOT NULL,
