@@ -63,25 +63,6 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	return i, err
 }
 
-const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, first_name, last_name, age
-FROM users
-WHERE id = $1
-LIMIT 1 FOR NO KEY UPDATE
-`
-
-func (q *Queries) GetUserForUpdate(ctx context.Context, id int32) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserForUpdate, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.FirstName,
-		&i.LastName,
-		&i.Age,
-	)
-	return i, err
-}
-
 const listUsers = `-- name: ListUsers :many
 SELECT id, first_name, last_name, age
 FROM users
