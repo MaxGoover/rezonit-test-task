@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/MaxGoover/rezonit-test-task/util"
+	"github.com/maxgoover/rezonit-test-task/util"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
