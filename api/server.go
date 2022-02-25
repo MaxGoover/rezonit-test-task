@@ -51,8 +51,9 @@ func (server *Server) Start() {
 
 	routes := mux.NewRouter()
 	routes.HandleFunc("/users", server.createUser).Methods("POST")
+	routes.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
+	//routes.HandleFunc("/users", server.ListUser).Methods("GET")
 	//routes.HandleFunc("/users/list", userHandler.List).Methods("GET")
-	//routes.HandleFunc("/users/find/{id:[0-9]+}", userHandler.Find).Methods("GET")
 	//router.POST("/users", server.createUser)
 	//router.GET("/users/:id", server.getUser)
 	//router.GET("/users", server.listUsers)

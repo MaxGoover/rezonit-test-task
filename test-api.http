@@ -1,7 +1,14 @@
-POST http://localhost:8080/users
+#POST http://localhost:8080/users
+#Content-Type: application/json
+#
+#{
+#  "first_name": "Leopold",
+#  "last_name": "Stotch",
+#  "age": 8
+#}
+
+###
+
+GET http://localhost:8080/users/50
 Content-Type: application/json
 
-{
-  "owner": "Leopold",
-  "currency": "USD"
-}
