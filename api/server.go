@@ -53,6 +53,8 @@ func (server *Server) Start() {
 	routes.HandleFunc("/users", server.createUser).Methods("POST")
 	routes.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
 	routes.HandleFunc("/users", server.listUsers).Methods("GET")
+	routes.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
+	routes.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
 
 	// Используем посредника
 	routes.Use(middleware.RequestLog)
