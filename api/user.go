@@ -77,28 +77,42 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	response.Ok(w, m)
 }
 
-//type listAccountRequest struct {
-//	PageID   int32 `form:"page_id" binding:"required,min=1"`          // Порядковый номер страницы
-//	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"` // Максимальное количество записей на странице
-//}
-//
-//func (server *Server) listAccount(ctx *gin.Context) {
-//	var req listAccountRequest
-//	if err := ctx.ShouldBindQuery(&req); err != nil {
-//		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-//		return
-//	}
-//
-//	arg := db.ListAccountsParams{
-//		Limit:  req.PageSize,
-//		Offset: (req.PageID - 1) * req.PageSize,
-//	}
-//
-//	accounts, err := server.store.ListAccounts(ctx, arg)
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-//		return
-//	}
-//
-//	ctx.JSON(http.StatusOK, accounts)
-//}
+type listUsersRequest struct {
+	Limit  int32 `form:"limit"`
+	Offset int32 `form:"offset"`
+}
+
+func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
+	//var req listUsersRequest
+	vars := r.URL.Query()
+
+	limit, err := strconv.ParseInt(vars.Get("limit"), 10, 32)
+	if err != nil {
+		response.Error(w, err, http.StatusBadRequest)
+		return
+	}
+
+	offset, err := strconv.ParseInt(vars.Get("offset"), 10, 32)
+	if err != nil {
+		response.Error(w, err, http.StatusBadRequest)
+		return
+	}
+
+	arg := db.ListUsersParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+
+	listUsers, err := server.storage.ListUsers(server.ctx, arg)
+	if err != nil {
+		response.Error(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var m = map[string]interface{}{
+		"result": "OK",
+		"data":   listUsers,
+	}
+
+	response.Ok(w, m)
+}

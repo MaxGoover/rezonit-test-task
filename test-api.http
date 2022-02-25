@@ -1,14 +1,84 @@
-#POST http://localhost:8080/users
-#Content-Type: application/json
-#
-#{
-#  "first_name": "Leopold",
-#  "last_name": "Stotch",
-#  "age": 8
-#}
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Stan",
+  "last_name": "Marsh",
+  "age": 8
+}
 
 ###
 
-GET http://localhost:8080/users/50
+POST http://localhost:8080/users
 Content-Type: application/json
 
+{
+  "first_name": "Kyle",
+  "last_name": "Broflovski",
+  "age": 9
+}
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Eric",
+  "last_name": "Cartman",
+  "age": 10
+}
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Kenny",
+  "last_name": "McCormick",
+  "age": 8
+}
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Leopold",
+  "last_name": "Stotch",
+  "age": 8
+}
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Craig",
+  "last_name": "Tucker",
+  "age": 8
+}
+
+###
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Tweak",
+  "last_name": "Tweak",
+  "age": 8
+}
+
+###
+
+GET http://localhost:8080/users/100
+Content-Type: application/json
+
+###
+
+GET http://localhost:8080/users?limit=1&offset=2
+Content-Type: application/json

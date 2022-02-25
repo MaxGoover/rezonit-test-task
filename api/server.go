@@ -52,13 +52,9 @@ func (server *Server) Start() {
 	routes := mux.NewRouter()
 	routes.HandleFunc("/users", server.createUser).Methods("POST")
 	routes.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	//routes.HandleFunc("/users", server.ListUser).Methods("GET")
-	//routes.HandleFunc("/users/list", userHandler.List).Methods("GET")
-	//router.POST("/users", server.createUser)
-	//router.GET("/users/:id", server.getUser)
-	//router.GET("/users", server.listUsers)
+	routes.HandleFunc("/users", server.listUsers).Methods("GET")
 
-	// Используем middleware посредников
+	// Используем посредника
 	routes.Use(middleware.RequestLog)
 
 	server.srv = &http.Server{
@@ -82,6 +78,7 @@ func (server *Server) Shutdown() {
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	//server.storage.Close() //закрываем соединение с БД
+
 	defer func() {
 		cancel()
 	}()
