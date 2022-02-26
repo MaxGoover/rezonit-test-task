@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"database/sql"
 	"github.com/gorilla/mux"
 	"github.com/maxgoover/rezonit-test-task/api/middleware"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
@@ -15,31 +14,21 @@ import (
 type Server struct {
 	config  util.Config
 	ctx     context.Context
-	storage *db.Storage
+	storage db.Storage
 	srv     *http.Server
 }
 
-func NewServer(config util.Config, ctx context.Context) *Server {
+func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
 	server := &Server{
-		ctx:    ctx,
-		config: config,
+		ctx:     ctx,
+		config:  config,
+		storage: storage,
 	}
 
 	return server
 }
 
 func (server *Server) Start() {
-	log.Println("Starting server")
-	log.Println(server.config.GetDBString())
-
-	// Создаем соединение с БД и сохраним его для закрытия при остановке приложения
-	conn, err := sql.Open(server.config.DBDriver, server.config.DBSource)
-	if err != nil {
-		log.Fatal("cannot connect to db:", err)
-	}
-
-	server.storage = db.NewStorage(conn)
-
 	//carsStorage := db3.NewCarStorage(server.db)    //создаем экземпляр storage для работы с бд и всем что связано с машинами
 	//usersStorage := db3.NewUsersStorage(server.storage) //создаем экземпляр storage для работы с бд и всем что связано с пользователями
 
@@ -66,7 +55,7 @@ func (server *Server) Start() {
 
 	log.Println("Server started")
 
-	err = server.srv.ListenAndServe() // запускаем сервер
+	err := server.srv.ListenAndServe() // запускаем сервер
 
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)

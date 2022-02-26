@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	_ "github.com/lib/pq"
 	"github.com/maxgoover/rezonit-test-task/api"
+	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
 	"os"
@@ -33,10 +35,19 @@ func main() {
 	// В случае поступления сигнала завершения - уведомляем наш канал, бережно закрываем наше приложение
 	signal.Notify(c, os.Interrupt)
 
+	log.Println("Starting server")
+
+	// Создаем соединение с БД и сохраним его для закрытия при остановке приложения
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	storage := db.NewStorage(conn)
+
 	// Создаем сервер
-	server := api.NewServer(config, ctx)
+	server := api.NewServer(config, ctx, storage)
 	// В server содержится экземпляр структуры Server
-	// Этот server принимает значение переменной окружения
 
 	// Горутина для ловли сообщений системы
 	go func() {
