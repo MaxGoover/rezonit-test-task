@@ -12,12 +12,6 @@ import (
 	"os/signal"
 )
 
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret@localhost:5432/rezonit_test_task?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
-
 func main() {
 	// Загружаем конфигурацию из конфига приложения
 	config, err := util.LoadConfig(".")
@@ -27,7 +21,7 @@ func main() {
 	}
 
 	// Создаем контекст для работы контексто-зависимых частей системы
-	ctx, cancel := context.WithCancel(context.Background())
+	_, cancel := context.WithCancel(context.Background())
 
 	// Создаем канал для сигналов ОС
 	c := make(chan os.Signal, 1)
@@ -46,7 +40,7 @@ func main() {
 	storage := db.NewStorage(conn)
 
 	// Создаем сервер
-	server := api.NewServer(config, ctx, storage)
+	server := api.NewServer(config, storage)
 	// В server содержится экземпляр структуры Server
 
 	// Горутина для ловли сообщений системы
@@ -61,7 +55,7 @@ func main() {
 	}()
 
 	// Запускаем сервер
-	server.Start()
+	server.Start(config.ServerAddress)
 
 	//conn, err := sql.Open(dbDriver, dbSource)
 	//if err != nil {
