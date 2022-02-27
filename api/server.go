@@ -19,24 +19,16 @@ type Server struct {
 	storage    db.Storage
 }
 
-func NewServer(config util.Config, storage db.Storage) *Server {
+func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
 	server := &Server{
 		config:  config,
+		ctx:     ctx,
 		storage: storage,
 	}
 	return server
 }
 
 func (server *Server) Start(address string) {
-	//carsStorage := db3.NewCarStorage(server.db)    //создаем экземпляр storage для работы с бд и всем что связано с машинами
-	//usersStorage := db3.NewUsersStorage(server.storage) //создаем экземпляр storage для работы с бд и всем что связано с пользователями
-
-	//carsProcessor := processors.NewCarsProcessor(carsStorage) //инициализируем процессоры соотвествующими storage
-	//usersProcessor := processors.NewUsersProcessor(usersStorage)
-
-	//userHandler := handlers.NewUsersHandler(usersProcessor) //инициализируем handlerы нашими процессорами
-	//carsHandler := handlers.NewCarsHandler(carsProcessor)
-
 	server.router = mux.NewRouter()
 	server.router.HandleFunc("/users", server.createUser).Methods("POST")
 	server.router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")

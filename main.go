@@ -21,7 +21,7 @@ func main() {
 	}
 
 	// Создаем контекст для работы контексто-зависимых частей системы
-	_, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Создаем канал для сигналов ОС
 	c := make(chan os.Signal, 1)
@@ -40,7 +40,7 @@ func main() {
 	storage := db.NewStorage(conn)
 
 	// Создаем сервер
-	server := api.NewServer(config, storage)
+	server := api.NewServer(config, ctx, storage)
 	// В server содержится экземпляр структуры Server
 
 	// Горутина для ловли сообщений системы
@@ -56,17 +56,4 @@ func main() {
 
 	// Запускаем сервер
 	server.Start(config.ServerAddress)
-
-	//conn, err := sql.Open(dbDriver, dbSource)
-	//if err != nil {
-	//	log.Fatal("cannot connect to db:", err)
-	//}
-	//
-	//storage := db.NewStorage(conn)
-	//server := api.NewServer(storage)
-	//
-	//err = server.Start(serverAddress)
-	//if err != nil {
-	//	log.Fatal("cannot start server:", err)
-	//}
 }

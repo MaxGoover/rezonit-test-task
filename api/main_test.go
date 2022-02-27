@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"github.com/stretchr/testify/require"
@@ -17,7 +18,7 @@ func newTestServer(t *testing.T, store db.Storage) *Server {
 		log.Fatal("cannot load config:", err)
 	}
 
-	server := NewServer(config, store)
+	server := NewServer(config, context.Background(), store)
 	require.NoError(t, err)
 
 	return server
