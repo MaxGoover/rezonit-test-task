@@ -2,18 +2,14 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	_ "github.com/lib/pq"
 	"github.com/maxgoover/rezonit-test-task/api"
+	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
 	"os"
 	"os/signal"
-)
-
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret@localhost:5432/rezonit_test_task?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
 )
 
 func main() {
@@ -25,7 +21,7 @@ func main() {
 	}
 
 	// Создаем контекст для работы контексто-зависимых частей системы
-	ctx, cancel := context.WithCancel(context.Background())
+	_, cancel := context.WithCancel(context.Background())
 
 	// Создаем канал для сигналов ОС
 	c := make(chan os.Signal, 1)
@@ -33,10 +29,19 @@ func main() {
 	// В случае поступления сигнала завершения - уведомляем наш канал, бережно закрываем наше приложение
 	signal.Notify(c, os.Interrupt)
 
+	log.Println("Starting server")
+
+	// Создаем соединение с БД и сохраним его для закрытия при остановке приложения
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	storage := db.NewStorage(conn)
+
 	// Создаем сервер
-	server := api.NewServer(config, ctx)
+	server := api.NewServer(config, storage)
 	// В server содержится экземпляр структуры Server
-	// Этот server принимает значение переменной окружения
 
 	// Горутина для ловли сообщений системы
 	go func() {
@@ -50,18 +55,5 @@ func main() {
 	}()
 
 	// Запускаем сервер
-	server.Start()
-
-	//conn, err := sql.Open(dbDriver, dbSource)
-	//if err != nil {
-	//	log.Fatal("cannot connect to db:", err)
-	//}
-	//
-	//storage := db.NewStorage(conn)
-	//server := api.NewServer(storage)
-	//
-	//err = server.Start(serverAddress)
-	//if err != nil {
-	//	log.Fatal("cannot start server:", err)
-	//}
+	server.Start(config.ServerAddress)
 }

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"database/sql"
 	"github.com/gorilla/mux"
 	"github.com/maxgoover/rezonit-test-task/api/middleware"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
@@ -13,33 +12,22 @@ import (
 )
 
 type Server struct {
-	config  util.Config
-	ctx     context.Context
-	storage *db.Storage
-	srv     *http.Server
+	config     util.Config
+	ctx        context.Context
+	httpServer *http.Server
+	router     *mux.Router
+	storage    db.Storage
 }
 
-func NewServer(config util.Config, ctx context.Context) *Server {
+func NewServer(config util.Config, storage db.Storage) *Server {
 	server := &Server{
-		ctx:    ctx,
-		config: config,
+		config:  config,
+		storage: storage,
 	}
-
 	return server
 }
 
-func (server *Server) Start() {
-	log.Println("Starting server")
-	log.Println(server.config.GetDBString())
-
-	// Создаем соединение с БД и сохраним его для закрытия при остановке приложения
-	conn, err := sql.Open(server.config.DBDriver, server.config.DBSource)
-	if err != nil {
-		log.Fatal("cannot connect to db:", err)
-	}
-
-	server.storage = db.NewStorage(conn)
-
+func (server *Server) Start(address string) {
 	//carsStorage := db3.NewCarStorage(server.db)    //создаем экземпляр storage для работы с бд и всем что связано с машинами
 	//usersStorage := db3.NewUsersStorage(server.storage) //создаем экземпляр storage для работы с бд и всем что связано с пользователями
 
@@ -49,24 +37,24 @@ func (server *Server) Start() {
 	//userHandler := handlers.NewUsersHandler(usersProcessor) //инициализируем handlerы нашими процессорами
 	//carsHandler := handlers.NewCarsHandler(carsProcessor)
 
-	routes := mux.NewRouter()
-	routes.HandleFunc("/users", server.createUser).Methods("POST")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	routes.HandleFunc("/users", server.listUsers).Methods("GET")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
+	server.router = mux.NewRouter()
+	server.router.HandleFunc("/users", server.createUser).Methods("POST")
+	server.router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
+	server.router.HandleFunc("/users", server.listUsers).Methods("GET")
+	server.router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
+	server.router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
 
 	// Используем посредника
-	routes.Use(middleware.RequestLog)
+	server.router.Use(middleware.RequestLog)
 
-	server.srv = &http.Server{
-		Addr:    server.config.ServerAddress,
-		Handler: routes,
+	server.httpServer = &http.Server{
+		Addr:    address,
+		Handler: server.router,
 	}
 
 	log.Println("Server started")
 
-	err = server.srv.ListenAndServe() // запускаем сервер
+	err := server.httpServer.ListenAndServe() // запускаем сервер
 
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)
@@ -85,7 +73,7 @@ func (server *Server) Shutdown() {
 		cancel()
 	}()
 	var err error
-	if err = server.srv.Shutdown(ctxShutDown); err != nil { //выключаем сервер, с ограниченным по времени контекстом
+	if err = server.httpServer.Shutdown(ctxShutDown); err != nil { //выключаем сервер, с ограниченным по времени контекстом
 		log.Fatalf("server Shutdown Failed:%s", err)
 	}
 
