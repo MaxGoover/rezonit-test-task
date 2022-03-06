@@ -1,4 +1,4 @@
-package response
+package api
 
 import (
 	"encoding/json"
@@ -6,10 +6,15 @@ import (
 	"net/http"
 )
 
-func Error(w http.ResponseWriter, err error, httpStatus int) {
-	var m = map[string]string{
-		"result": "error",
-		"data":   err.Error(),
+type responseJSON struct {
+	result string
+	data   interface{}
+}
+
+func responseError(w http.ResponseWriter, err error, httpStatus int) {
+	m := responseJSON{
+		result: "error",
+		data:   err.Error(),
 	}
 
 	res, _ := json.Marshal(m)
@@ -19,7 +24,12 @@ func Error(w http.ResponseWriter, err error, httpStatus int) {
 	fmt.Fprintln(w, string(res))
 }
 
-func Ok(w http.ResponseWriter, m map[string]interface{}) {
+func responseOk(w http.ResponseWriter, responseData interface{}) {
+	m := responseJSON{
+		result: "ok",
+		data:   responseData,
+	}
+
 	res, _ := json.Marshal(m)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
