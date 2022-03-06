@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"github.com/gorilla/mux"
-	"github.com/maxgoover/rezonit-test-task/api/middleware"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
@@ -30,27 +29,22 @@ func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Ser
 
 func (server *Server) Start(address string) {
 	server.router = mux.NewRouter()
+	server.router.HandleFunc("/users", server.listUsers).Methods("GET")
 	server.router.HandleFunc("/users", server.createUser).Methods("POST")
 	server.router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	server.router.HandleFunc("/users", server.listUsers).Methods("GET")
 	server.router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
 	server.router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
-
-	// Используем посредника
-	server.router.Use(middleware.RequestLog)
 
 	server.httpServer = &http.Server{
 		Addr:    address,
 		Handler: server.router,
 	}
 
-	log.Println("Server started")
-
 	err := server.httpServer.ListenAndServe() // запускаем сервер
-
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)
 	}
+	log.Println("Server started")
 
 	return
 }
