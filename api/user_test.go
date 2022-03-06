@@ -1,64 +1,146 @@
 package api
 
 import (
-	"fmt"
+	"bytes"
+	"database/sql"
+	"encoding/json"
 	"github.com/golang/mock/gomock"
 	mockdb "github.com/maxgoover/rezonit-test-task/db/mock"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"github.com/stretchr/testify/require"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestGetUserAPI(t *testing.T) {
+type bodyTestCase map[string]interface{}
+
+func TestCreateUserAPI(t *testing.T) {
 	user := randomUser()
 
-	// Далее, нужно создать фиктивную бд
-	// Для этого используем функцию NewMockStorage()
-	ctrl := gomock.NewController(t)
-	// Объект, который управляет состоянием теста
+	testCases := []struct {
+		name          string
+		body          bodyTestCase
+		buildStubs    func(storage *mockdb.MockStorage)
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: bodyTestCase{
+				"first_name": user.FirstName,
+				"last_name":  user.LastName,
+				"age":        user.Age,
+			},
+			buildStubs: func(storage *mockdb.MockStorage) {
+				arg := db.CreateUserParams{
+					FirstName: user.FirstName,
+					LastName:  user.LastName,
+					Age:       user.Age,
+				}
+				storage.EXPECT().
+					CreateUser(gomock.Any(), arg).
+					Times(1).
+					Return(user, nil)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchUser(t, recorder.Body, user)
+			},
+		},
+		{
+			name: "InternalError",
+			body: bodyTestCase{
+				"first_name": user.FirstName,
+				"last_name":  user.LastName,
+				"age":        user.Age,
+			},
+			buildStubs: func(storage *mockdb.MockStorage) {
+				storage.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, sql.ErrConnDone)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidFirstName",
+			body: bodyTestCase{
+				"first_name": "invalid-firstname#1",
+				"last_name":  user.LastName,
+				"age":        user.Age,
+			},
+			buildStubs: func(storage *mockdb.MockStorage) {
+				storage.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidLastName",
+			body: bodyTestCase{
+				"first_name": user.FirstName,
+				"last_name":  "invalid-lastname#2",
+				"age":        user.Age,
+			},
+			buildStubs: func(storage *mockdb.MockStorage) {
+				storage.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+		{
+			name: "InvalidAge",
+			body: bodyTestCase{
+				"first_name": user.FirstName,
+				"last_name":  user.LastName,
+				"age":        -1,
+			},
+			buildStubs: func(storage *mockdb.MockStorage) {
+				storage.EXPECT().
+					CreateUser(gomock.Any(), gomock.Any()).
+					Times(0)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
 
-	// Функция Finish() проверит, все ли функции теста выполнились и в полном объеме
-	defer ctrl.Finish()
+	for i := range testCases {
+		tc := testCases[i]
 
-	// Создаем новое хранилище
-	storage := mockdb.NewMockStorage(ctrl)
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	// Теперь, создаем заглушки для метода GetUser()
-	// Для определения заглушки мы должны указать с какими двумя значениями аргументов эта функция GetUser()
-	// будет вызываться
-	storage.EXPECT().
-		// Определение этой заглушки звучит так:
-		// "Я ожидаю, что функция GetUser() будет вызываться с любым контекстом и конкретным аргументом
-		// идентификатора учетной записи"
-		GetUser(gomock.Any(), gomock.Eq(user.ID)).
-		// Мы хотим, чтобы функция GetUser() вызвалась один раз
-		Times(1).
-		// Мы хотим, чтобы функция GetUser() возвращала объекта user и нулевую ошибку
-		Return(user, nil)
-	// Теперь наша заглушка готова
+			storage := mockdb.NewMockStorage(ctrl)
+			tc.buildStubs(storage)
 
-	// Теперь "запустим" наш сервер, но вместо реальной бд, подсунем ему фиктивную бд mockdb
-	server := newTestServer(t, storage)
+			server := newTestServer(t, storage)
+			recorder := httptest.NewRecorder()
 
-	// Чтобы не запускать сервер по-настоящему, мы будем использовать функцию записи пакета httptest
-	// для записи ответа на запрос API
-	// Для создания нового ResponseRecorder
-	recorder := httptest.NewRecorder()
+			// Marshal body data to JSON
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
 
-	// Url - который мы хотим вызвать - протестировать
-	url := fmt.Sprintf("/users/%d", user.ID)
+			url := "/users"
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			require.NoError(t, err)
 
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
-
-	// Отправляем запрос через маршрутизатор сервера и запишет его ответ в рекордере
-	server.router.ServeHTTP(recorder, request)
-
-	// И затем проверяем полученный ответ
-	require.Equal(t, http.StatusOK, recorder.Code)
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(recorder)
+		})
+	}
 }
 
 func randomUser() db.User {
@@ -68,4 +150,17 @@ func randomUser() db.User {
 		LastName:  util.GenerateRandomString(9),
 		Age:       util.GenerateRandomInt(1, 100),
 	}
+}
+
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
+	data, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+
+	var gotUser db.User
+	err = json.Unmarshal(data, &gotUser)
+
+	require.NoError(t, err)
+	require.Equal(t, user.FirstName, gotUser.FirstName)
+	require.Equal(t, user.LastName, gotUser.LastName)
+	require.Equal(t, user.Age, gotUser.Age)
 }
