@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/maxgoover/rezonit-test-task/api/response"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"net/http"
-	"strconv"
 )
 
 type createUserRequest struct {
@@ -21,7 +19,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	var req createUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -33,17 +31,11 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := server.storage.CreateUser(server.ctx, arg)
 	if err != nil {
-		response.Error(w, err, http.StatusInternalServerError)
+		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	var m = map[string]interface{}{
-		"result": "OK",
-		"data":   user,
-	}
-
-	fmt.Println("response.Ok")
-	response.Ok(w, m)
+	responseOk(w, user)
 }
 
 type deleteUserRequest struct {
@@ -52,32 +44,25 @@ type deleteUserRequest struct {
 
 func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 	var req deleteUserRequest
-	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 32)
+	paramsURL := mux.Vars(r)
+	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	req.ID = int32(id)
 	err = server.storage.DeleteUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			response.Error(w, err, http.StatusNotFound)
+			responseError(w, err, http.StatusNotFound)
 			return
 		}
 
-		response.Error(w, err, http.StatusInternalServerError)
+		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	var m = map[string]interface{}{
-		"result": "OK",
-		"data":   "User deleted",
-	}
-
-	fmt.Println("response.Ok")
-	response.Ok(w, m)
+	responseOk(w, "User deleted")
 }
 
 type getUserRequest struct {
@@ -86,76 +71,64 @@ type getUserRequest struct {
 
 func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	var req getUserRequest
-	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 32)
+	paramsURL := mux.Vars(r)
+	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	req.ID = int32(id)
 	user, err := server.storage.GetUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			response.Error(w, err, http.StatusNotFound)
+			responseError(w, err, http.StatusNotFound)
 			return
 		}
 
-		response.Error(w, err, http.StatusInternalServerError)
+		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	var m = map[string]interface{}{
-		"result": "OK",
-		"data":   user,
-	}
-
-	fmt.Println("response.Ok")
-	response.Ok(w, m)
+	responseOk(w, user)
 }
 
-//type listUsersRequest struct {
-//	Limit  int32 `form:"limit"`
-//	Offset int32 `form:"offset"`
-//}
+type listUsersRequest struct {
+	Limit  int32 `form:"limit"`
+	Offset int32 `form:"offset"`
+}
 
 func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
-	//var req listUsersRequest
+	var req listUsersRequest
 	vars := r.URL.Query()
 
-	limit, err := strconv.ParseInt(vars.Get("limit"), 10, 32)
+	_, err := fmt.Sscan(vars.Get("limit"), &req.Limit)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
-	offset, err := strconv.ParseInt(vars.Get("offset"), 10, 32)
+	_, err = fmt.Sscan(vars.Get("offset"), &req.Offset)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	arg := db.ListUsersParams{
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  req.Limit,
+		Offset: req.Offset,
 	}
 
 	listUsers, err := server.storage.ListUsers(server.ctx, arg)
 	if err != nil {
-		response.Error(w, err, http.StatusInternalServerError)
+		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	var m = map[string]interface{}{
-		"result": "OK",
-		"data":   listUsers,
-	}
-
-	fmt.Println("response.Ok")
-	response.Ok(w, m)
+	responseOk(w, listUsers)
 }
 
 type updateUserRequest struct {
+	ID        int32  `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Age       int32  `json:"age"`
@@ -163,21 +136,21 @@ type updateUserRequest struct {
 
 func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	var req updateUserRequest
-	vars := mux.Vars(r)
-	id, err := strconv.ParseInt(vars["id"], 10, 32)
+	paramsURL := mux.Vars(r)
+	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		response.Error(w, err, http.StatusBadRequest)
+		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	arg := db.UpdateUserParams{
-		ID:        int32(id),
+		ID:        req.ID,
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Age:       req.Age,
@@ -185,15 +158,9 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := server.storage.UpdateUser(server.ctx, arg)
 	if err != nil {
-		response.Error(w, err, http.StatusInternalServerError)
+		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	var m = map[string]interface{}{
-		"result": "OK",
-		"data":   user,
-	}
-
-	fmt.Println("response.Ok")
-	response.Ok(w, m)
+	responseOk(w, user)
 }
