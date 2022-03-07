@@ -11,11 +11,11 @@ import (
 )
 
 type Server struct {
-	config     util.Config
-	ctx        context.Context
-	httpServer *http.Server
-	router     *mux.Router
-	storage    db.Storage
+	config  util.Config
+	ctx     context.Context
+	router  *mux.Router
+	srv     *http.Server
+	storage db.Storage
 }
 
 func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
@@ -27,20 +27,25 @@ func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Ser
 	return server
 }
 
-func (server *Server) Start(address string) {
-	server.router = mux.NewRouter()
-	server.router.HandleFunc("/users", server.listUsers).Methods("GET")
-	server.router.HandleFunc("/users", server.createUser).Methods("POST")
-	server.router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	server.router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
-	server.router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
+func (server *Server) setupRouter() {
+	router := mux.NewRouter()
+	router.HandleFunc("/users", server.listUsers).Methods("GET")
+	router.HandleFunc("/users", server.createUser).Methods("POST")
+	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
+	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
+	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
 
-	server.httpServer = &http.Server{
-		Addr:    address,
+	server.router = router
+}
+
+func (server *Server) Start(serverAddress string) {
+	server.setupRouter()
+	server.srv = &http.Server{
+		Addr:    serverAddress,
 		Handler: server.router,
 	}
 
-	err := server.httpServer.ListenAndServe() // запускаем сервер
+	err := server.srv.ListenAndServe() // запускаем сервер
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)
 	}
@@ -53,13 +58,12 @@ func (server *Server) Shutdown() {
 	log.Printf("server stopped")
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//server.storage.Close() //закрываем соединение с БД
 
 	defer func() {
 		cancel()
 	}()
 	var err error
-	if err = server.httpServer.Shutdown(ctxShutDown); err != nil { //выключаем сервер, с ограниченным по времени контекстом
+	if err = server.srv.Shutdown(ctxShutDown); err != nil { //выключаем сервер, с ограниченным по времени контекстом
 		log.Fatalf("server Shutdown Failed:%s", err)
 	}
 
