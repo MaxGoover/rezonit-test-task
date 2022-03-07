@@ -29,19 +29,15 @@ func main() {
 	// В случае поступления сигнала завершения - уведомляем наш канал, бережно закрываем наше приложение
 	signal.Notify(c, os.Interrupt)
 
-	log.Println("Starting server")
-
 	// Создаем соединение с БД и сохраним его для закрытия при остановке приложения
-	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	conn, err := sql.Open(config.DBDriver, config.DBSource())
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
 
 	storage := db.NewStorage(conn)
-
-	// Создаем сервер
+	log.Println("Starting server...")
 	server := api.NewServer(config, ctx, storage)
-	// В server содержится экземпляр структуры Server
 
 	// Горутина для ловли сообщений системы
 	go func() {
