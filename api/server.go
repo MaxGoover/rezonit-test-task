@@ -7,15 +7,18 @@ import (
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
 type Server struct {
-	config  util.Config
-	ctx     context.Context
-	router  *mux.Router
-	srv     *http.Server
-	storage db.Storage
+	config   util.Config
+	ctx      context.Context
+	errorLog *log.Logger
+	infoLog  *log.Logger
+	router   *mux.Router
+	srv      *http.Server
+	storage  db.Storage
 }
 
 func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
@@ -38,11 +41,16 @@ func (server *Server) setupRouter() {
 	server.router = router
 }
 
-func (server *Server) Start(serverAddress string) {
+func (server *Server) Start() {
 	server.setupRouter()
+	server.infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	server.errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	server.srv = &http.Server{
-		Addr:    serverAddress,
-		Handler: server.router,
+		Addr:         server.config.ServerAddress,
+		Handler:      server.router,
+		ReadTimeout:  server.config.AppReadTimeout * time.Second,
+		WriteTimeout: server.config.AppWriteTimeout * time.Second,
 	}
 
 	err := server.srv.ListenAndServe() // запускаем сервер
@@ -63,7 +71,7 @@ func (server *Server) Shutdown() {
 		cancel()
 	}()
 	var err error
-	if err = server.srv.Shutdown(ctxShutDown); err != nil { //выключаем сервер, с ограниченным по времени контекстом
+	if err = server.srv.Shutdown(ctxShutDown); err != nil {
 		log.Fatalf("server Shutdown Failed:%s", err)
 	}
 

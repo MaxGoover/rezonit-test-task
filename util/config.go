@@ -3,11 +3,15 @@ package util
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"time"
 )
 
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
 type Config struct {
+	AppReadTimeout  time.Duration `mapstructure:"APP_READ_TIMEOUT"`
+	AppWriteTimeout time.Duration `mapstructure:"APP_WRITE_TIMEOUT"`
+
 	DBDriver   string `mapstructure:"DB_DRIVER"`
 	DBHost     string `mapstructure:"DB_HOST"`
 	DBName     string `mapstructure:"DB_NAME"`
