@@ -6,8 +6,10 @@ import (
 	"time"
 )
 
-const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const alphabetLength = len(alphabet)
+const (
+	alphabet       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	alphabetLength = len(alphabet)
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())

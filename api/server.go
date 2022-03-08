@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"github.com/gorilla/mux"
-	"github.com/maxgoover/rezonit-test-task/api/middleware"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
@@ -14,52 +13,43 @@ import (
 type Server struct {
 	config  util.Config
 	ctx     context.Context
-	storage db.Storage
+	router  *mux.Router
 	srv     *http.Server
+	storage db.Storage
 }
 
 func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
 	server := &Server{
-		ctx:     ctx,
 		config:  config,
+		ctx:     ctx,
 		storage: storage,
 	}
-
 	return server
 }
 
-func (server *Server) Start() {
-	//carsStorage := db3.NewCarStorage(server.db)    //создаем экземпляр storage для работы с бд и всем что связано с машинами
-	//usersStorage := db3.NewUsersStorage(server.storage) //создаем экземпляр storage для работы с бд и всем что связано с пользователями
+func (server *Server) setupRouter() {
+	router := mux.NewRouter()
+	router.HandleFunc("/users", server.listUsers).Methods("GET")
+	router.HandleFunc("/users", server.createUser).Methods("POST")
+	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
+	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
+	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
 
-	//carsProcessor := processors.NewCarsProcessor(carsStorage) //инициализируем процессоры соотвествующими storage
-	//usersProcessor := processors.NewUsersProcessor(usersStorage)
+	server.router = router
+}
 
-	//userHandler := handlers.NewUsersHandler(usersProcessor) //инициализируем handlerы нашими процессорами
-	//carsHandler := handlers.NewCarsHandler(carsProcessor)
-
-	routes := mux.NewRouter()
-	routes.HandleFunc("/users", server.createUser).Methods("POST")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	routes.HandleFunc("/users", server.listUsers).Methods("GET")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
-	routes.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
-
-	// Используем посредника
-	routes.Use(middleware.RequestLog)
-
+func (server *Server) Start(serverAddress string) {
+	server.setupRouter()
 	server.srv = &http.Server{
-		Addr:    server.config.ServerAddress,
-		Handler: routes,
+		Addr:    serverAddress,
+		Handler: server.router,
 	}
 
-	log.Println("Server started")
-
 	err := server.srv.ListenAndServe() // запускаем сервер
-
 	if err != nil && err != http.ErrServerClosed {
 		log.Fatalln(err)
 	}
+	log.Println("Server started")
 
 	return
 }
@@ -68,7 +58,6 @@ func (server *Server) Shutdown() {
 	log.Printf("server stopped")
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//server.storage.Close() //закрываем соединение с БД
 
 	defer func() {
 		cancel()
