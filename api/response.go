@@ -24,7 +24,7 @@ func responseError(w http.ResponseWriter, err error, httpStatus int) {
 	fmt.Fprintln(w, string(resJSON))
 }
 
-func responseOk(w http.ResponseWriter, responseData interface{}) {
+func responseOK(w http.ResponseWriter, responseData interface{}) {
 	res := &responseDTO{
 		Result: "ok",
 		Data:   responseData,

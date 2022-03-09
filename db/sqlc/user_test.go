@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -84,7 +83,6 @@ func createRandomUser(t *testing.T) User {
 		Age:       util.GenerateRandomInt(1, 100),
 	}
 
-	fmt.Printf("new user = %v", arg)
 	user, err := testQueries.CreateUser(context.Background(), arg)
 
 	require.NoError(t, err)
