@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
+	"github.com/maxgoover/rezonit-test-task/pkg/logging"
 	"net/http"
 )
 
@@ -16,6 +17,7 @@ type createUserRequest struct {
 }
 
 func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
+	logging.Info.Println("get params from request")
 	var req createUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -29,6 +31,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		Age:       req.Age,
 	}
 
+	logging.Info.Println("create user")
 	user, err := server.storage.CreateUser(server.ctx, arg)
 	if err != nil {
 		responseError(w, err, http.StatusInternalServerError)
@@ -43,6 +46,7 @@ type deleteUserRequest struct {
 }
 
 func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
+	logging.Info.Println("get params from request")
 	var req deleteUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -51,6 +55,7 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("delete user")
 	err = server.storage.DeleteUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -70,6 +75,7 @@ type getUserRequest struct {
 }
 
 func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
+	logging.Info.Println("get params from request")
 	var req getUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -78,6 +84,7 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("get user")
 	user, err := server.storage.GetUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -98,6 +105,7 @@ type listUsersRequest struct {
 }
 
 func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
+	logging.Info.Println("get params from request")
 	var req listUsersRequest
 	vars := r.URL.Query()
 
@@ -118,6 +126,7 @@ func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
 		Offset: req.Offset,
 	}
 
+	logging.Info.Println("get list users")
 	listUsers, err := server.storage.ListUsers(server.ctx, arg)
 	if err != nil {
 		responseError(w, err, http.StatusInternalServerError)
@@ -135,6 +144,7 @@ type updateUserRequest struct {
 }
 
 func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	logging.Info.Println("get params from request")
 	var req updateUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -156,6 +166,7 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		Age:       req.Age,
 	}
 
+	logging.Info.Println("update user")
 	user, err := server.storage.UpdateUser(server.ctx, arg)
 	if err != nil {
 		responseError(w, err, http.StatusInternalServerError)
