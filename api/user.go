@@ -21,6 +21,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	var req createUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -34,6 +35,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	logging.Info.Println("create user")
 	user, err := server.storage.CreateUser(server.ctx, arg)
 	if err != nil {
+		logging.Error.Println("internal server error")
 		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -52,6 +54,7 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -60,10 +63,12 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 	err = server.storage.DeleteUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logging.Error.Println("not found")
 			responseError(w, err, http.StatusNotFound)
 			return
 		}
 
+		logging.Error.Println("internal server error")
 		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -81,6 +86,7 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -89,10 +95,12 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	user, err := server.storage.GetUser(server.ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logging.Error.Println("not found")
 			responseError(w, err, http.StatusNotFound)
 			return
 		}
 
+		logging.Error.Println("internal server error")
 		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -113,12 +121,14 @@ func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
 
 	_, err := fmt.Sscan(vars.Get("limit"), &req.Limit)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	_, err = fmt.Sscan(vars.Get("offset"), &req.Offset)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -131,6 +141,7 @@ func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
 	logging.Info.Println("get list users")
 	listUsers, err := server.storage.ListUsers(server.ctx, arg)
 	if err != nil {
+		logging.Error.Println("internal server error")
 		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
@@ -152,12 +163,14 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logging.Error.Println("bad request")
 		responseError(w, err, http.StatusBadRequest)
 		return
 	}
@@ -172,6 +185,7 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	logging.Info.Println("update user")
 	user, err := server.storage.UpdateUser(server.ctx, arg)
 	if err != nil {
+		logging.Error.Println("internal server error")
 		responseError(w, err, http.StatusInternalServerError)
 		return
 	}
