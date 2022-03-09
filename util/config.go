@@ -18,7 +18,7 @@ type Config struct {
 }
 
 func (c *Config) DBSource() string {
-	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v", c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.SSLMode)
+	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v", c.DBUser, c.DBPassword, c.DBDriver, c.DBPort, c.DBName, c.SSLMode)
 }
 
 func LoadConfig(path string) (config Config, err error) {
