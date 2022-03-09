@@ -10,8 +10,8 @@ import (
 	"github.com/maxgoover/rezonit-test-task/util"
 )
 
-var testQueries *Queries
 var testDB *sql.DB
+var testQueries *Queries
 
 func TestMain(m *testing.M) {
 	config, err := util.LoadConfig("../..")
@@ -25,6 +25,5 @@ func TestMain(m *testing.M) {
 	}
 
 	testQueries = New(testDB)
-
 	os.Exit(m.Run())
 }

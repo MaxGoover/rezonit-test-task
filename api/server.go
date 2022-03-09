@@ -4,21 +4,19 @@ import (
 	"context"
 	"github.com/gorilla/mux"
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
+	"github.com/maxgoover/rezonit-test-task/pkg/logging"
 	"github.com/maxgoover/rezonit-test-task/util"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
 type Server struct {
-	config   util.Config
-	ctx      context.Context
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	router   *mux.Router
-	srv      *http.Server
-	storage  db.Storage
+	config  util.Config
+	ctx     context.Context
+	router  *mux.Router
+	srv     *http.Server
+	storage db.Storage
 }
 
 func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
@@ -43,21 +41,18 @@ func (server *Server) setupRouter() {
 
 func (server *Server) Start() {
 	server.setupRouter()
-	server.infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-	server.errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
 	server.srv = &http.Server{
 		Addr:         server.config.ServerAddress,
 		Handler:      server.router,
-		ReadTimeout:  server.config.AppReadTimeout * time.Second,
-		WriteTimeout: server.config.AppWriteTimeout * time.Second,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
 	}
 
-	err := server.srv.ListenAndServe() // запускаем сервер
+	logging.Info.Println("server started")
+	err := server.srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		log.Fatalln(err)
+		logging.Error.Fatal(err)
 	}
-	log.Println("Server started")
 
 	return
 }
