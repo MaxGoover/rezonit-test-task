@@ -41,7 +41,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logging.Info.Println("user created")
-	responseOK(w, user)
+	responseOk(w, user)
 }
 
 type deleteUserRequest struct {
@@ -73,7 +73,7 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseOK(w, "user deleted")
+	responseOk(w, "user deleted")
 }
 
 type getUserRequest struct {
@@ -106,7 +106,7 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logging.Info.Println("user gotten")
-	responseOK(w, user)
+	responseOk(w, user)
 }
 
 type listUsersRequest struct {
@@ -147,7 +147,7 @@ func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logging.Info.Println("list users gotten")
-	responseOK(w, listUsers)
+	responseOk(w, listUsers)
 }
 
 type updateUserRequest struct {
@@ -191,5 +191,5 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logging.Info.Println("user updated")
-	responseOK(w, user)
+	responseOk(w, user)
 }
