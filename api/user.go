@@ -17,7 +17,7 @@ type createUserRequest struct {
 }
 
 func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
-	logging.Info.Println("get params from request")
+	logging.Info.Println("get params from request for create user")
 	var req createUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -38,6 +38,7 @@ func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("user created")
 	responseOk(w, user)
 }
 
@@ -46,7 +47,7 @@ type deleteUserRequest struct {
 }
 
 func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
-	logging.Info.Println("get params from request")
+	logging.Info.Println("get params from request for delete user")
 	var req deleteUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -67,7 +68,7 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseOk(w, "User deleted")
+	responseOk(w, "user deleted")
 }
 
 type getUserRequest struct {
@@ -75,7 +76,7 @@ type getUserRequest struct {
 }
 
 func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
-	logging.Info.Println("get params from request")
+	logging.Info.Println("get params from request for get user")
 	var req getUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -96,6 +97,7 @@ func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("user gotten")
 	responseOk(w, user)
 }
 
@@ -105,7 +107,7 @@ type listUsersRequest struct {
 }
 
 func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
-	logging.Info.Println("get params from request")
+	logging.Info.Println("get params from request for get list users")
 	var req listUsersRequest
 	vars := r.URL.Query()
 
@@ -133,6 +135,7 @@ func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("list users gotten")
 	responseOk(w, listUsers)
 }
 
@@ -144,7 +147,7 @@ type updateUserRequest struct {
 }
 
 func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
-	logging.Info.Println("get params from request")
+	logging.Info.Println("get params from request for update user")
 	var req updateUserRequest
 	paramsURL := mux.Vars(r)
 	_, err := fmt.Sscan(paramsURL["id"], &req.ID)
@@ -173,5 +176,6 @@ func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("user updated")
 	responseOk(w, user)
 }
