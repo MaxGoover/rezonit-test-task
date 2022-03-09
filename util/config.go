@@ -5,8 +5,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config stores all configuration of the application.
-// The values are read by viper from a config file or environment variable.
 type Config struct {
 	DBDriver   string `mapstructure:"DB_DRIVER"`
 	DBHost     string `mapstructure:"DB_HOST"`
@@ -23,7 +21,6 @@ func (c *Config) DBSource() string {
 	return fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=%v", c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.SSLMode)
 }
 
-// LoadConfig reads configuration from environment file or variables
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
