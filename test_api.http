@@ -1,0 +1,171 @@
+### create user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Stan",
+  "last_name": "Marsh",
+  "age": 8
+}
+
+> {%
+client.test("create user", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### create user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Kyle",
+  "last_name": "Broflovski",
+  "age": 9
+}
+
+> {%
+client.test("create user", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### create user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Eric",
+  "last_name": "Cartman",
+  "age": 10
+}
+
+> {%
+client.test("create user", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### create user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Kenny",
+  "last_name": "McCormick",
+  "age": 11
+}
+
+> {%
+client.test("create user", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### create user with wrong type field
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": true,
+  "last_name": "TestLastName",
+  "age": 15
+}
+
+> {%
+client.test("create user with wrong types fields", function() {
+  client.assert(response.status === 400);
+});
+%}
+
+### create user with wrong type field
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "TestFirstName",
+  "last_name": "TestLastName",
+  "age": "Fifteen"
+}
+
+> {%
+client.test("create user with wrong types fields", function() {
+  client.assert(response.status === 400);
+});
+%}
+
+### get user by id
+GET http://localhost:8080/users/2
+Content-Type: application/json
+
+> {%
+client.test("get user by id", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### get user by wrong id
+GET http://localhost:8080/users/999
+Content-Type: application/json
+
+> {%
+client.test("get user by wrong id", function() {
+  client.assert(response.status === 404);
+});
+%}
+
+### get list users
+GET http://localhost:8080/users?limit=2&offset=2
+Content-Type: application/json
+
+> {%
+client.test("get list users", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### get list users by wrong limit
+GET http://localhost:8080/users?limit=wrong&offset=2
+Content-Type: application/json
+
+> {%
+client.test("get list users by wrong limit", function() {
+  client.assert(response.status === 400);
+});
+%}
+
+### get list users by wrong offset
+GET http://localhost:8080/users?limit=2&offset=wrong
+Content-Type: application/json
+
+> {%
+client.test("get list users by wrong offset", function() {
+  client.assert(response.status === 400);
+});
+%}
+
+### update user
+PUT http://localhost:8080/users/2
+Content-Type: application/json
+
+{
+  "first_name": "Mr.",
+  "last_name": "Garrison",
+  "age": 30
+}
+
+> {%
+client.test("update user", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### delete user
+DELETE http://localhost:8080/users/2
+Content-Type: application/json
+
+> {%
+client.test("delete user", function() {
+  client.assert(response.status === 200);
+});
+%}
