@@ -73,6 +73,7 @@ func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logging.Info.Println("user deleted")
 	responseOK(w, "user deleted")
 }
 
