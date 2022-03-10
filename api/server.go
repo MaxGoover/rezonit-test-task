@@ -6,7 +6,6 @@ import (
 	db "github.com/maxgoover/rezonit-test-task/db/sqlc"
 	"github.com/maxgoover/rezonit-test-task/pkg/logging"
 	"github.com/maxgoover/rezonit-test-task/util"
-	"log"
 	"net/http"
 	"time"
 )
@@ -42,13 +41,11 @@ func (server *Server) setupRouter() {
 func (server *Server) Start() {
 	server.setupRouter()
 	server.srv = &http.Server{
-		Addr:         server.config.ServerAddress,
-		Handler:      server.router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
+		Addr:    server.config.ServerAddress,
+		Handler: server.router,
 	}
 
-	logging.Info.Println("server started")
+	logging.Info.Println("server starting...")
 	err := server.srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		logging.Error.Fatal(err)
@@ -58,20 +55,16 @@ func (server *Server) Start() {
 }
 
 func (server *Server) Shutdown() {
-	log.Printf("server stopped")
-
+	logging.Info.Printf("server stopped")
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	defer func() {
-		cancel()
-	}()
 	var err error
 	if err = server.srv.Shutdown(ctxShutDown); err != nil {
-		log.Fatalf("server Shutdown Failed:%s", err)
+		logging.Error.Fatalf("server Shutdown Failed:%s", err)
 	}
 
-	log.Printf("server exited properly")
-
+	logging.Info.Printf("server exited properly")
 	if err == http.ErrServerClosed {
 		err = nil
 	}
