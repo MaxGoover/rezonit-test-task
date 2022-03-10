@@ -45,7 +45,7 @@ func (server *Server) Start() {
 		Handler: server.router,
 	}
 
-	logging.Info.Println("server starting...")
+	logging.Info.Println("server started...")
 	err := server.srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		logging.Error.Fatal(err)
@@ -55,7 +55,7 @@ func (server *Server) Start() {
 }
 
 func (server *Server) Shutdown() {
-	logging.Info.Printf("server stopped")
+	logging.Info.Printf("server stops")
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
