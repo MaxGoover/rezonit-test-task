@@ -75,7 +75,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/users/128
+GET http://localhost:8080/users/2
 Content-Type: application/json
 
 ###
@@ -85,12 +85,7 @@ Content-Type: application/json
 
 ###
 
-#DELETE http://localhost:8080/users/128
-#Content-Type: application/json
-
-###
-
-PUT http://localhost:8080/users/129
+PUT http://localhost:8080/users/2
 Content-Type: application/json
 
 {
@@ -98,3 +93,8 @@ Content-Type: application/json
   "last_name": "Garrison",
   "age": 30
 }
+
+###
+
+DELETE http://localhost:8080/users/2
+Content-Type: application/json
