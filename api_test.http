@@ -62,6 +62,38 @@ client.test("create user", function() {
 });
 %}
 
+### create user preflight request OPTIONS
+OPTIONS http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Randy",
+  "last_name": "Marsh",
+  "age": 35
+}
+
+> {%
+client.test("create user preflight request OPTIONS", function() {
+  client.assert(response.status === 200);
+});
+%}
+
+### create user wrong method
+PUT http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "first_name": "Randy",
+  "last_name": "Marsh",
+  "age": 35
+}
+
+> {%
+client.test("create user wrong method", function() {
+  client.assert(response.status === 405, "this method not allowed");
+});
+%}
+
 ### create user with wrong type field
 POST http://localhost:8080/users
 Content-Type: application/json
