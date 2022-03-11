@@ -31,7 +31,7 @@ func main() {
 
 	logging.Info.Println("start server")
 	storage := db.NewStorage(conn)
-	server := api.NewServer(config, ctx, storage)
+	server := api.NewServer(ctx, config, storage)
 
 	go func() {
 		oscall := <-c

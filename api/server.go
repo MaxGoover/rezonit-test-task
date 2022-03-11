@@ -18,7 +18,7 @@ type Server struct {
 	storage db.Storage
 }
 
-func NewServer(config util.Config, ctx context.Context, storage db.Storage) *Server {
+func NewServer(ctx context.Context, config util.Config, storage db.Storage) *Server {
 	server := &Server{
 		config:  config,
 		ctx:     ctx,
