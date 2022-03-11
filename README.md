@@ -1,6 +1,8 @@
 Для запуска api тестового задания необходимо:
-- ОС семейства Linux
-- docker compose
+
+    ОС семейства Linux
+    docker compose
 
 Запуск проекта:
-make server-up
+
+    make server-up
