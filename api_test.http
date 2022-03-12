@@ -62,22 +62,6 @@ client.test("create user", function() {
 });
 %}
 
-### create user preflight request OPTIONS
-OPTIONS http://localhost:8080/users
-Content-Type: application/json
-
-{
-  "first_name": "Randy",
-  "last_name": "Marsh",
-  "age": 35
-}
-
-> {%
-client.test("create user preflight request OPTIONS", function() {
-  client.assert(response.status === 200);
-});
-%}
-
 ### create user wrong method
 PUT http://localhost:8080/users
 Content-Type: application/json
@@ -153,6 +137,26 @@ Content-Type: application/json
 > {%
 client.test("get list users", function() {
   client.assert(response.status === 200);
+});
+%}
+
+### get list users without params
+GET http://localhost:8080/users
+Content-Type: application/json
+
+> {%
+client.test("get list users without params", function() {
+  client.assert(response.status === 400);
+});
+%}
+
+### get list users without params
+GET http://localhost:8080/users?limit=&offset=
+Content-Type: application/json
+
+> {%
+client.test("get list users without params", function() {
+  client.assert(response.status === 400);
 });
 %}
 
