@@ -3,7 +3,6 @@ module github.com/maxgoover/rezonit-test-task
 go 1.18
 
 require (
-	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.4
 	github.com/spf13/viper v1.10.1

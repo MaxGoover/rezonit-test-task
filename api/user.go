@@ -17,6 +17,12 @@ type createUserRequest struct {
 }
 
 func (server *Server) createUser(w http.ResponseWriter, r *http.Request) {
+	(w).Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	CORSHandler(&w)
+	if (r).Method == "OPTIONS" {
+		return
+	}
+
 	logging.Info.Println("get params from request for create user")
 	var req createUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -49,6 +55,12 @@ type deleteUserRequest struct {
 }
 
 func (server *Server) deleteUser(w http.ResponseWriter, r *http.Request) {
+	(w).Header().Set("Access-Control-Allow-Methods", "DELETE, OPTIONS")
+	CORSHandler(&w)
+	if (r).Method == "OPTIONS" {
+		return
+	}
+
 	logging.Info.Println("get params from request for delete user")
 	var req deleteUserRequest
 	paramsURL := mux.Vars(r)
@@ -82,6 +94,12 @@ type getUserRequest struct {
 }
 
 func (server *Server) getUser(w http.ResponseWriter, r *http.Request) {
+	(w).Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	CORSHandler(&w)
+	if (r).Method == "OPTIONS" {
+		return
+	}
+
 	logging.Info.Println("get params from request for get user")
 	var req getUserRequest
 	paramsURL := mux.Vars(r)
@@ -116,6 +134,12 @@ type listUsersRequest struct {
 }
 
 func (server *Server) listUsers(w http.ResponseWriter, r *http.Request) {
+	(w).Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	CORSHandler(&w)
+	if (r).Method == "OPTIONS" {
+		return
+	}
+
 	logging.Info.Println("get params from request for get list users")
 	var req listUsersRequest
 	vars := r.URL.Query()
@@ -159,6 +183,12 @@ type updateUserRequest struct {
 }
 
 func (server *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	(w).Header().Set("Access-Control-Allow-Methods", "PUT, OPTIONS")
+	CORSHandler(&w)
+	if (r).Method == "OPTIONS" {
+		return
+	}
+
 	logging.Info.Println("get params from request for update user")
 	var req updateUserRequest
 	paramsURL := mux.Vars(r)

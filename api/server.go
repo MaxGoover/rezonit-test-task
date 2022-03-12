@@ -29,11 +29,12 @@ func NewServer(ctx context.Context, config util.Config, storage db.Storage) *Ser
 
 func (server *Server) setupRouter() {
 	router := mux.NewRouter()
-	router.HandleFunc("/users", server.listUsers).Methods("GET")
-	router.HandleFunc("/users", server.createUser).Methods("POST")
-	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET")
-	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT")
-	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE")
+
+	router.HandleFunc("/users", server.createUser).Methods("POST", "OPTIONS")
+	router.HandleFunc("/users", server.listUsers).Methods("GET", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE", "OPTIONS")
 
 	server.router = router
 }
