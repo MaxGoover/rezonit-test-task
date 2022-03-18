@@ -7,7 +7,8 @@
 
     make server-up
 
-Тестовое задание на Fullstack Developer (Golang)
+
+#Тестовое задание на Fullstack Developer (Golang)
 
 Модель:
 
