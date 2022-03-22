@@ -13,15 +13,15 @@ import (
 )
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
 	logging.Info.Println("load config")
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		logging.Error.Fatal("cannot load config:", err)
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
 
 	logging.Info.Println("connect to db")
 	conn, err := sql.Open(config.DBDriver, config.DBSource())

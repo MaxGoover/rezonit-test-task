@@ -27,18 +27,6 @@ func NewServer(ctx context.Context, config util.Config, storage db.Storage) *Ser
 	return server
 }
 
-func (server *Server) setupRouter() {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/users", server.createUser).Methods("POST", "OPTIONS")
-	router.HandleFunc("/users", server.listUsers).Methods("GET", "OPTIONS")
-	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET", "OPTIONS")
-	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT", "OPTIONS")
-	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE", "OPTIONS")
-
-	server.router = router
-}
-
 func (server *Server) Start() {
 	server.setupRouter()
 	server.srv = &http.Server{
@@ -69,4 +57,16 @@ func (server *Server) Shutdown() {
 	if err == http.ErrServerClosed {
 		err = nil
 	}
+}
+
+func (server *Server) setupRouter() {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/users", server.createUser).Methods("POST", "OPTIONS")
+	router.HandleFunc("/users", server.listUsers).Methods("GET", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.getUser).Methods("GET", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.updateUser).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/users/{id:[0-9]+}", server.deleteUser).Methods("DELETE", "OPTIONS")
+
+	server.router = router
 }
